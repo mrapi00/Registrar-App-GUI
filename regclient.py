@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #-----------------------------------------------------------------------
-# reg.py
+# regclient.py
 #-----------------------------------------------------------------------
 
 import argparse
@@ -73,7 +73,7 @@ def top_frame(labels, line_edits) :
     return topframe
 
 # creates the bottom half frame, namely the list widget
-def bottom_list_frame(listwidget):
+def bottom_list_frame(listwidget: QListWidget):
     layout = QGridLayout()
     layout.setSpacing(0)
     layout.setContentsMargins(0, 0, 0, 0)
@@ -114,7 +114,7 @@ class RegThread (Thread):
         try:
             with socket() as sock:
                 sock.connect((args.host, args.port))
-                print("Sent command: get_overviews")
+                print("Sent command: submit")
                 out_flo = sock.makefile(mode='w', encoding='utf-8')
                 out_flo.write('submit\n')
 
