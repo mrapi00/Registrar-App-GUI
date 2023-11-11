@@ -25,7 +25,7 @@ args = parser.parse_args()
 DATABASE_URL = 'file:reg.sqlite?mode=ro'
 
 #-----------------------------------------------------------------------
-# function which takes in a string field and adds a '/' character before
+# function which takes in a string field and adds a '\' character before
 # every occurence of an '_' or '%' character. Returns the new string.
 def put_escapechar(field) :
     ans = ""
@@ -58,14 +58,14 @@ def create_fields(area, dept, num, title) :
 #-----------------------------------------------------------------------
 
 # create SQL statement to retrieve necessary fields
-def create_sql(create) :
+def create_sql(conditions) :
     stmt_str = "SELECT classid, dept, coursenum, area, "
     stmt_str += "title FROM classes, courses, "
     stmt_str += "crosslistings WHERE classes.courseid "
     stmt_str += "= courses.courseid AND courses.courseid = "
     stmt_str += "crosslistings.courseid "
-    if create != "" :
-        stmt_str += create
+    if conditions != "" :
+        stmt_str += conditions
         stmt_str += " ESCAPE '\\' "
     stmt_str += "ORDER BY dept ASC, coursenum ASC, "
     stmt_str += "classid ASC"
@@ -103,8 +103,8 @@ def prof_fields(courseid) :
     return stmt_str
 
 #----------------------------------------------------------------------
-# helper function to write out area, title, descrip, and pre-reqs
-def getdetailhelper(out_flo, row) :
+# helper function to write area, title, descrip, and pre-reqs
+def course_helper(out_flo, row) :
     out_flo.write("Area: " + row[0] + '\n')
     out_flo.write('\n')
 
@@ -114,6 +114,18 @@ def getdetailhelper(out_flo, row) :
     out_flo.write('\n')
 
     out_flo.write("Prerequisites: " + row[3] + '\n')
+    out_flo.write('\n')
+
+# helper function to write logistics info
+def logistics_helper(out_flo, courseid, row):
+    out_flo.write("Course Id: " + courseid + '\n')
+    out_flo.write('\n')
+
+    out_flo.write("Days: " + row[1] + '\n')
+    out_flo.write("Start time: " + row[2] + '\n')
+    out_flo.write("End time: " + row[3] + '\n')
+    out_flo.write("Building: " + row[4] + '\n')
+    out_flo.write("Room: " + row[5] + '\n')
     out_flo.write('\n')
 
 # executes the "get_detail" command from client
@@ -143,14 +155,7 @@ def getdetails(sock, in_flo) :
                 out_flo.flush()
 
                 courseid = str(row[0])
-                out_flo.write("Course Id: " + courseid + '\n')
-                out_flo.write('\n')
-                out_flo.write("Days: " + row[1] + '\n')
-                out_flo.write("Start time: " + row[2] + '\n')
-                out_flo.write("End time: " + row[3] + '\n')
-                out_flo.write("Building: " + row[4] + '\n')
-                out_flo.write("Room: " + row[5] + '\n')
-                out_flo.write('\n')
+                logistics_helper(out_flo, courseid, row)
 
                 # choose corresponding fields from crosslisting
                 stmt_str = crosslisting_fields(courseid)
@@ -168,7 +173,7 @@ def getdetails(sock, in_flo) :
                 cursor.execute(stmt_str)
 
                 row = cursor.fetchone()
-                getdetailhelper(out_flo, row)
+                course_helper(out_flo, row)
                 # choose corresponding fields from profs to display
                 stmt_str = prof_fields(courseid)
                 cursor.execute(stmt_str)
@@ -182,7 +187,7 @@ def getdetails(sock, in_flo) :
         print(ex, file=stderr)
         out_flo.write('System Error\n')
 #----------------------------------------------------------------------
-# executes the "get_overview" command from client
+# executes the "submit" command from client
 def submit(sock, in_flo) :
     dept = in_flo.readline().strip('\n')
     num = in_flo.readline().strip('\n')
@@ -227,7 +232,7 @@ def handle_client(sock):
     in_flo = sock.makefile(mode = 'r', encoding = 'utf-8')
     command = in_flo.readline().strip()
     if command == 'submit' :
-        # print('get_overview')
+        # print('submit')
         submit(sock, in_flo)
     elif command == 'details':
         # print('get_detail')
