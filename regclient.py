@@ -113,7 +113,7 @@ class RegThread (Thread):
     def run(self):
         try:
             with socket() as sock:
-                sock.connect((args.host, args.port))
+                sock.connect((self._host, self._port))
                 print("Sent command: submit")
                 out_flo = sock.makefile(mode='w', encoding='utf-8')
                 out_flo.write('submit\n')
@@ -240,7 +240,6 @@ def main() :
                 details_message = ''
                 in_flo = sock.makefile(mode = 'r', encoding='utf-8')
                 read_status = in_flo.readline().strip()
-                # print(read_status)
                 # checks for database error
                 if read_status == 'System Error' or read_status == '':
                     QMessageBox.information(window, 'Error',
@@ -272,7 +271,7 @@ def main() :
     # triggers query search
     listwidget.itemActivated.connect(item_activate_slot)
 
-    # allow "Enter" key to submit too
+    # query once entering
     line_edit_dept.textChanged.connect(submit_slot)
     line_edit_area.textChanged.connect(submit_slot)
     line_edit_num.textChanged.connect(submit_slot)
