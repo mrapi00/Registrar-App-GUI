@@ -203,8 +203,7 @@ def main() :
     timer.setInterval(100) # milliseconds
     timer.start()
 
-    # Handle signals.
-
+    # Handle signals
     reg_thread = None
 
     # trigger a query when user submits
@@ -215,6 +214,7 @@ def main() :
         num = line_edit_num.text()
         area = line_edit_area.text()
         title = line_edit_title.text()
+        # abort previous thread
         if reg_thread is not None:
             reg_thread.stop()
         reg_thread = RegThread(args.host, args.port, dept, num, area, 
